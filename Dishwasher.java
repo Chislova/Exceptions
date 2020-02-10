@@ -1,12 +1,11 @@
-
 public class Dishwasher {
 
-    private static int maxLoad;
-    private String[] content = new String[maxLoad];
-    Status status;
+    private int maxLoad;
+    private String[] content;
+    private Status status;
     int numberOfDishes;
 
-    public static int getMaxLoad() {
+    public int getMaxLoad() {
         return maxLoad;
     }
 
@@ -19,10 +18,10 @@ public class Dishwasher {
     public Dishwasher(int quantity) throws IllegalArgumentException {
         status = Status.EMPTY;
         maxLoad = quantity;
+        content = new String[maxLoad];
         if (maxLoad <= 0) {
             throw new IllegalArgumentException("The number of plates must be greater than zero!");
         }
-
     }
 
     public void getStatus() {
@@ -33,12 +32,12 @@ public class Dishwasher {
     /**
      * Checks if it possible to start a program. If succeed - changes the status.
      *
-     * @throws emptyDishwasher to print error message if dishwasher is empty.
+     * @throws EmptyDishwasher to print error message if dishwasher is empty.
      */
-    public void start() throws emptyDishwasher {
+    public void start() throws EmptyDishwasher {
         switch (status) {
             case EMPTY:
-                throw new emptyDishwasher();
+                throw new EmptyDishwasher();
 
             case DIRTY:
                 status = Status.IN_PROGRESS;
@@ -49,14 +48,14 @@ public class Dishwasher {
     /**
      * Checks if it possible to stop a program. If succeed - changes the status.
      *
-     * @throws programNotStarted to return an error if the program hadn't been started.
+     * @throws ProgramNotStarted to return an error if the program hadn't been started.
      */
-    public void stop() throws programNotStarted {
+    public void stop() throws ProgramNotStarted {
         if (status == Status.IN_PROGRESS) {
             status = Status.CLEAN;
-        } else throw new programNotStarted();
-
-
+            return;
+        }
+        throw new ProgramNotStarted();
     }
 
     /**
@@ -66,14 +65,13 @@ public class Dishwasher {
         status = Status.EMPTY;
         numberOfDishes = 0;
         content = new String[maxLoad];
-
     }
 
     /**
      * Gets and prints the content according to the status.
      */
     public void getContent() {
-        if (status.equals(Status.EMPTY) && numberOfDishes == 0) {
+        if (status == Status.EMPTY && numberOfDishes == 0) {
             System.out.println("[ ]");
         } else {
             for (int i = 0; i < content.length; i++) {
@@ -92,32 +90,19 @@ public class Dishwasher {
      * Allows to fill the array (fills the dishwasher) and change the status
      *
      * @param dish - name of the dish.
-     * @throws maxCount         returns error if the max count fo dishes is reached.
-     * @throws programIsRunning returns error that it's impossible to add a dish if the status is "In progress".
-     * @throws cleanDishes      returns error that it's impossible to add a dish if the status is "Clean".
+     * @throws MaxCount         returns error if the max count fo dishes is reached.
+     * @throws ProgramIsRunning returns error that it's impossible to add a dish if the status is "In progress".
+     * @throws CleanDishes      returns error that it's impossible to add a dish if the status is "Clean".
      */
-    public void addDishes(String dish) throws maxCount {
+    public void addDishes(String dish) throws MaxCount, ProgramIsRunning, CleanDishes {
         if (status == Status.IN_PROGRESS) {
-            try {
-                throw new programIsRunning();
-            } catch (programIsRunning programIsRunning) {
-                programIsRunning.printStackTrace();
-            }
+            throw new ProgramIsRunning();
         } else if (status == Status.CLEAN) {
-            try {
-                throw new cleanDishes();
-            } catch (cleanDishes cleanDishes) {
-                cleanDishes.getStackTrace();
-            }
-
+            throw new CleanDishes();
         } else if (numberOfDishes < content.length) {
             content[numberOfDishes] = dish;
             numberOfDishes++;
             status = Status.DIRTY;
-        } else throw new maxCount();
+        } else throw new MaxCount();
     }
 }
-
-
-
-
